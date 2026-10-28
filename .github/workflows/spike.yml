@@ -50,7 +50,7 @@ jobs:
             coverlet: '10.1.0'
     runs-on: ${{ matrix.os }}
     env:
-      LABEL: S3 ${{ runner.os }} MTP ${{ matrix.mtp }} coverlet.MTP ${{ matrix.coverlet }} ${{ matrix.launch }}
+      LABEL: S3 ${{ matrix.os }} MTP ${{ matrix.mtp }} coverlet.MTP ${{ matrix.coverlet }} ${{ matrix.launch }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
