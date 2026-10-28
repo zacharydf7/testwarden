@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        mtp: ['2.0.2', '2.5.2']
+        mtp: ['2.0.2', '2.2.2', '2.5.2']
         probe: ['true', 'false']
     runs-on: ${{ matrix.os }}
     steps:
@@ -41,11 +41,13 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        mtp: ['2.0.2', '2.5.2']
+        mtp: ['2.0.2', '2.2.2', '2.5.2']
         launch: [exe, dotnet-test]
         include:
           - mtp: '2.0.2'
             coverlet: '8.0.1'
+          - mtp: '2.2.2'
+            coverlet: '10.0.1'
           - mtp: '2.5.2'
             coverlet: '10.1.0'
     runs-on: ${{ matrix.os }}
@@ -96,7 +98,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        mtp: ['2.0.2', '2.5.2']
+        mtp: ['2.0.2', '2.2.2', '2.5.2']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -121,6 +123,6 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-      - run: for lab in XunitV3 Xunit4 MSTest NUnit TUnit; do dotnet build QuarantineLab/$lab -c Release; done
+      - run: for lab in XunitV3 XunitV3Mtp25 Xunit4 MSTest NUnit TUnit; do dotnet build QuarantineLab/$lab -c Release; done
       - run: dotnet build QuarantineCheck -c Release
       - run: dotnet QuarantineCheck/bin/Release/net10.0/QuarantineCheck.dll QuarantineLab --summary "$GITHUB_STEP_SUMMARY"

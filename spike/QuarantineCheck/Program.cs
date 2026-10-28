@@ -15,7 +15,7 @@ string[] keptWithFilter = ["Adds", "BillsLater", "Refunds", "Ships"];
 
 (string Lab, string Strategy)[] cases =
 [
-    ("XunitV3", "xunit-simple"), ("XunitV3", "xunit-query"), ("XunitV3", "uid"),
+    ("XunitV3", "xunit-simple"), ("XunitV3", "xunit-query"), ("XunitV3", "uid"), ("XunitV3Mtp25", "uid"),
     ("Xunit4", "xunit-simple"), ("Xunit4", "xunit-query"), ("Xunit4", "vstest"), ("Xunit4", "uid"),
     ("MSTest", "vstest"), ("MSTest", "uid"),
     ("NUnit", "vstest"), ("NUnit", "uid"),
@@ -76,7 +76,7 @@ List<string>? Arguments(string lab, string strategy, bool withUserFilter, string
 {
     var nativeFilter = !withUserFilter ? [] : lab switch
     {
-        "XunitV3" or "Xunit4" => ["--filter-not-trait", "Category=Slow"],
+        "XunitV3" or "XunitV3Mtp25" or "Xunit4" => ["--filter-not-trait", "Category=Slow"],
         "TUnit" => ["--treenode-filter", "/*/*/*/*[Category!=Slow]"],
         _ => (List<string>)["--filter", "TestCategory!=Slow"],
     };
