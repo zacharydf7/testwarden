@@ -3,6 +3,8 @@
   <!-- Prototype of the MTP extension: net8.0 and MTP 2.0.2, the oldest a consumer is likely to have. -->
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <!-- ProbeDebugType=none mimics the NuGet package, which ships symbols in the .snupkg rather than next to the dll. -->
+    <DebugType Condition="'$(ProbeDebugType)' != ''">$(ProbeDebugType)</DebugType>
   </PropertyGroup>
 
   <ItemGroup>

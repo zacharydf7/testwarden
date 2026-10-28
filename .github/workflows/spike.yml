@@ -57,9 +57,10 @@ jobs:
         with:
           dotnet-version: 10.0.x
       - run: dotnet build Harness -c Release
+      # The probe ships without a pdb, as the NuGet package will: coverlet then leaves the extension assembly alone.
       - run: >-
           dotnet build CrashLab -c Release -p:MtpVersion=${{ matrix.mtp }} -p:UseCoverlet=true -p:UseCrashDump=true
-          -p:CoverletVersion=${{ matrix.coverlet }}
+          -p:CoverletVersion=${{ matrix.coverlet }} -p:ProbeDebugType=none
       - name: Coverage with default settings
         if: always()
         run: >-
@@ -80,6 +81,14 @@ jobs:
         run: >-
           dotnet Harness/bin/Release/net10.0/Harness.dll CrashLab "$LABEL, coverlet + crashdump" 5 ${{ matrix.launch }}
           --summary "$GITHUB_STEP_SUMMARY" -- --coverlet --coverlet-output-format cobertura --crashdump --crashdump-type Mini
+      # A locally built extension with its pdb next to it, which older coverlet.MTP versions try to instrument.
+      - name: Coverage with the probe's pdb present
+        if: always()
+        run: >-
+          dotnet build CrashLab -c Release -p:MtpVersion=${{ matrix.mtp }} -p:UseCoverlet=true -p:UseCrashDump=true
+          -p:CoverletVersion=${{ matrix.coverlet }} -p:ProbeDebugType=portable
+          && dotnet Harness/bin/Release/net10.0/Harness.dll CrashLab "$LABEL, coverlet default, probe pdb present" 2 ${{ matrix.launch }}
+          --summary "$GITHUB_STEP_SUMMARY" -- --coverlet --coverlet-output-format cobertura
 
   # S4: can the extension forgive a proven teardown crash by setting TESTINGPLATFORM_EXITCODE_IGNORE=7 itself?
   s4-ignore-trick:
@@ -99,3 +108,19 @@ jobs:
       - run: >-
           dotnet Harness/bin/Release/net10.0/Harness.dll CrashLab "S4 ${{ runner.os }} MTP ${{ matrix.mtp }} ignore trick"
           20 exe --ignore-trick --summary "$GITHUB_STEP_SUMMARY"
+
+  # S2: does one quarantine list remove exactly the quarantined tests in every framework, next to the user's own filter?
+  s2-quarantine-matrix:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: for lab in XunitV3 Xunit4 MSTest NUnit TUnit; do dotnet build QuarantineLab/$lab -c Release; done
+      - run: dotnet build QuarantineCheck -c Release
+      - run: dotnet QuarantineCheck/bin/Release/net10.0/QuarantineCheck.dll QuarantineLab --summary "$GITHUB_STEP_SUMMARY"

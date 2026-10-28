@@ -1,0 +1,7 @@
+{
+  "quarantinedTests": [
+    { "package": "QuarantineLab", "class": "OrderTests", "name": "Bills" },
+    { "package": "QuarantineLab", "class": "OrderTests", "name": "QuarantineLab.OrderTests.Rounds(x: 1)" },
+    { "package": "", "class": "QuarantineLab.CartTests", "name": "Removes" }
+  ]
+}
