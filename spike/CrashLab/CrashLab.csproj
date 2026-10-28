@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- MtpVersion picks the Microsoft.Testing.Platform version; the Use* switches add extensions. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsTestProject>true</IsTestProject>
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <MtpVersion Condition="'$(MtpVersion)' == ''">2.0.2</MtpVersion>
+    <UseProbe Condition="'$(UseProbe)' == ''">true</UseProbe>
+    <UseCoverlet Condition="'$(UseCoverlet)' == ''">false</UseCoverlet>
+    <UseCrashDump Condition="'$(UseCrashDump)' == ''">false</UseCrashDump>
+    <CoverletVersion Condition="'$(CoverletVersion)' == ''">10.1.0</CoverletVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3.mtp-v2" Version="3.2.2" />
+    <PackageReference Include="Microsoft.Testing.Platform" Version="$(MtpVersion)" />
+    <PackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="$(MtpVersion)" />
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SampleLibrary\SampleLibrary.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UseProbe)' == 'true'">
+    <ProjectReference Include="..\Probe\Probe.csproj" />
+    <TestingPlatformBuilderHook Include="5B0C3B52-6C86-4D43-9E0B-2A6A3C1E8F01">
+      <DisplayName>Probe</DisplayName>
+      <TypeFullName>Probe.TestingPlatformBuilderHook</TypeFullName>
+    </TestingPlatformBuilderHook>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UseCoverlet)' == 'true'">
+    <PackageReference Include="coverlet.MTP" Version="$(CoverletVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UseCrashDump)' == 'true'">
+    <PackageReference Include="Microsoft.Testing.Extensions.CrashDump" Version="$(MtpVersion)" />
+  </ItemGroup>
+
+</Project>

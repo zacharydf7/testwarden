@@ -1,0 +1,101 @@
+name: Spike
+
+on:
+  push:
+    branches: [main]
+    paths: ['spike/**', '.github/workflows/spike.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+    working-directory: spike
+
+jobs:
+  # S1: does every CrashLab scenario get the right verdict, 20 runs out of 20?
+  s1-crashlab:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        mtp: ['2.0.2', '2.5.2']
+        probe: ['true', 'false']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet build Harness -c Release
+      - run: dotnet build CrashLab -c Release -p:MtpVersion=${{ matrix.mtp }} -p:UseProbe=${{ matrix.probe }}
+      - run: >-
+          dotnet Harness/bin/Release/net10.0/Harness.dll CrashLab "S1 ${{ runner.os }} MTP ${{ matrix.mtp }} probe=${{ matrix.probe }}"
+          20 exe --summary "$GITHUB_STEP_SUMMARY"
+
+  # S3: do the marker and coverage survive both launch modes, next to coverlet.MTP and CrashDump?
+  s3-host-matrix:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        mtp: ['2.0.2', '2.5.2']
+        launch: [exe, dotnet-test]
+        include:
+          - mtp: '2.0.2'
+            coverlet: '8.0.1'
+          - mtp: '2.5.2'
+            coverlet: '10.1.0'
+    runs-on: ${{ matrix.os }}
+    env:
+      LABEL: S3 ${{ runner.os }} MTP ${{ matrix.mtp }} coverlet.MTP ${{ matrix.coverlet }} ${{ matrix.launch }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet build Harness -c Release
+      - run: >-
+          dotnet build CrashLab -c Release -p:MtpVersion=${{ matrix.mtp }} -p:UseCoverlet=true -p:UseCrashDump=true
+          -p:CoverletVersion=${{ matrix.coverlet }}
+      - name: Coverage with default settings
+        if: always()
+        run: >-
+          dotnet Harness/bin/Release/net10.0/Harness.dll CrashLab "$LABEL, coverlet default" 5 ${{ matrix.launch }}
+          --summary "$GITHUB_STEP_SUMMARY" -- --coverlet --coverlet-output-format cobertura
+      - name: Coverage with an include filter
+        if: always()
+        run: >-
+          dotnet Harness/bin/Release/net10.0/Harness.dll CrashLab "$LABEL, coverlet include" 5 ${{ matrix.launch }}
+          --summary "$GITHUB_STEP_SUMMARY" -- --coverlet --coverlet-output-format cobertura --coverlet-include "[SampleLibrary]*"
+      - name: CrashDump
+        if: always()
+        run: >-
+          dotnet Harness/bin/Release/net10.0/Harness.dll CrashLab "$LABEL, crashdump" 5 ${{ matrix.launch }}
+          --summary "$GITHUB_STEP_SUMMARY" -- --crashdump --crashdump-type Mini
+      - name: Coverage and CrashDump together
+        if: always()
+        run: >-
+          dotnet Harness/bin/Release/net10.0/Harness.dll CrashLab "$LABEL, coverlet + crashdump" 5 ${{ matrix.launch }}
+          --summary "$GITHUB_STEP_SUMMARY" -- --coverlet --coverlet-output-format cobertura --crashdump --crashdump-type Mini
+
+  # S4: can the extension forgive a proven teardown crash by setting TESTINGPLATFORM_EXITCODE_IGNORE=7 itself?
+  s4-ignore-trick:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        mtp: ['2.0.2', '2.5.2']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet build Harness -c Release
+      - run: dotnet build CrashLab -c Release -p:MtpVersion=${{ matrix.mtp }}
+      - run: >-
+          dotnet Harness/bin/Release/net10.0/Harness.dll CrashLab "S4 ${{ runner.os }} MTP ${{ matrix.mtp }} ignore trick"
+          20 exe --ignore-trick --summary "$GITHUB_STEP_SUMMARY"

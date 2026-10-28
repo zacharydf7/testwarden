@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Prototype of the MTP extension: net8.0 and MTP 2.0.2, the oldest a consumer is likely to have. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Testing.Platform" Version="2.0.2" />
+  </ItemGroup>
+
+</Project>
