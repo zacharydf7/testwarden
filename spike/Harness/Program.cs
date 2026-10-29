@@ -43,7 +43,7 @@ var mismatches = 0;
 foreach (var scenario in scenarios)
 {
     var group = observations.Where(o => o.Scenario == scenario).ToList();
-    var wrong = group.Count(o => !VerdictRules.Matches(scenario, VerdictRules.Decide(o)));
+    var wrong = group.Count(o => !Expectations.Met(o, ignoreTrick, extraArguments));
     mismatches += wrong;
     var ok = wrong == 0 ? "yes" : $"**{wrong} wrong**";
     summary.AppendLine($"| {scenario} | {Tally(group, o => o.ExitCode.ToString())} "

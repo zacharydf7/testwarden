@@ -64,28 +64,28 @@ jobs:
           dotnet build CrashLab -c Release -p:MtpVersion=${{ matrix.mtp }} -p:UseCoverlet=true -p:UseCrashDump=true
           -p:CoverletVersion=${{ matrix.coverlet }} -p:ProbeDebugType=none
       - name: Coverage with default settings
-        if: always()
+        if: ${{ !cancelled() }}
         run: >-
           dotnet Harness/bin/Release/net10.0/Harness.dll CrashLab "$LABEL, coverlet default" 5 ${{ matrix.launch }}
           --summary "$GITHUB_STEP_SUMMARY" -- --coverlet --coverlet-output-format cobertura
       - name: Coverage with an include filter
-        if: always()
+        if: ${{ !cancelled() }}
         run: >-
           dotnet Harness/bin/Release/net10.0/Harness.dll CrashLab "$LABEL, coverlet include" 5 ${{ matrix.launch }}
           --summary "$GITHUB_STEP_SUMMARY" -- --coverlet --coverlet-output-format cobertura --coverlet-include "[SampleLibrary]*"
       - name: CrashDump
-        if: always()
+        if: ${{ !cancelled() }}
         run: >-
           dotnet Harness/bin/Release/net10.0/Harness.dll CrashLab "$LABEL, crashdump" 5 ${{ matrix.launch }}
           --summary "$GITHUB_STEP_SUMMARY" -- --crashdump --crashdump-type Mini
       - name: Coverage and CrashDump together
-        if: always()
+        if: ${{ !cancelled() }}
         run: >-
           dotnet Harness/bin/Release/net10.0/Harness.dll CrashLab "$LABEL, coverlet + crashdump" 5 ${{ matrix.launch }}
           --summary "$GITHUB_STEP_SUMMARY" -- --coverlet --coverlet-output-format cobertura --crashdump --crashdump-type Mini
       # A locally built extension with its pdb next to it, which older coverlet.MTP versions try to instrument.
       - name: Coverage with the probe's pdb present
-        if: always()
+        if: ${{ !cancelled() }}
         run: >-
           dotnet build CrashLab -c Release -p:MtpVersion=${{ matrix.mtp }} -p:UseCoverlet=true -p:UseCrashDump=true
           -p:CoverletVersion=${{ matrix.coverlet }} -p:ProbeDebugType=portable

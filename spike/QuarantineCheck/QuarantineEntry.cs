@@ -8,7 +8,8 @@ public sealed record QuarantineEntry(string Namespace, string Class, string Meth
 
     public string FullName => $"{FullClassName}.{Method}";
 
-    // Bitbucket's sample splits the class into package and class; JUnit names may repeat the class and add arguments.
+    // Format from https://support.atlassian.com/bitbucket-cloud/docs/quarantining-flaky-tests/, whose sample splits the
+    // class into package and class; JUnit names may also repeat the class and add arguments.
     public static QuarantineEntry FromBitbucket(string? package, string className, string name)
     {
         var fullClassName = string.IsNullOrEmpty(package) ? className : $"{package}.{className}";

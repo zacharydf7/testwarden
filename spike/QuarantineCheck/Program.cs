@@ -34,12 +34,16 @@ foreach (var (lab, strategy) in cases)
     var family = TestApp.Family(app);
     foreach (var withUserFilter in (bool[])[false, true])
     {
-        var arguments = Arguments(lab, strategy, withUserFilter, app);
         var expected = withUserFilter ? keptWithFilter : keptWithoutFilter;
         string listed, ran, listingResult, runResult;
-        if (arguments is null)
+        if (strategy == "uid" && !TestApp.ListsJson(app))
         {
             (listed, ran, listingResult, runResult) = ("-", "-", "not supported", "not supported");
+        }
+        else if (Arguments(lab, strategy, withUserFilter, app) is not { } arguments)
+        {
+            (listed, ran, listingResult, runResult) = ("-", "-", "**FAIL** (listing failed)", "**FAIL**");
+            failures += 2;
         }
         else
         {
@@ -49,9 +53,12 @@ foreach (var (lab, strategy) in cases)
             var total = Regex.Match(run.Output, @"total: (\d+)").Groups[1].Value;
             listed = string.Join(" ", methods);
             ran = total.Length == 0 ? $"exit {run.ExitCode}" : total;
-            var listingOk = listing.ExitCode == 0 && methods.SequenceEqual(expected);
+            // NUnit's --list-tests ignores "!=" on a parameterized method that its run honors (see FilterTranslator.VsTest).
+            var knownGap = lab == "NUnit" && strategy == "vstest";
+            var expectedListing = knownGap ? [.. expected.Append("Rounds").Append("Rounds").Order(StringComparer.Ordinal)] : expected;
+            var listingOk = listing.ExitCode == 0 && methods.SequenceEqual(expectedListing);
             var runOk = total == expected.Length.ToString();
-            listingResult = listingOk ? "pass" : "**FAIL**";
+            listingResult = !listingOk ? "**FAIL**" : knownGap ? "known NUnit gap: lists Rounds" : "pass";
             runResult = runOk ? "pass" : "**FAIL**";
             failures += (listingOk ? 0 : 1) + (runOk ? 0 : 1);
         }

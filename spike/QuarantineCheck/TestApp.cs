@@ -43,6 +43,9 @@ public static class TestApp
         return methods;
     }
 
+    // MTP 2.3 added "--list-tests json"; its help text names the 'json' value.
+    public static bool ListsJson(string app) => Run(app, ["--help"]).Output.Contains("'json'", StringComparison.Ordinal);
+
     public static string Family(string app)
     {
         var help = Run(app, ["--help"]).Output;

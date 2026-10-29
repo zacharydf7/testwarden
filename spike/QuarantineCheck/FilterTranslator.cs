@@ -42,9 +42,5 @@ public static class FilterTranslator
         return ["--filter", userFilter is null ? filter : $"({userFilter})&{filter}"];
     }
 
-    private static string NoneOf(IEnumerable<string> names)
-    {
-        var distinct = names.Distinct().ToList();
-        return distinct.Count == 1 ? $"(!{distinct[0]})" : string.Join("&", distinct.Select(n => $"(!{n})"));
-    }
+    private static string NoneOf(IEnumerable<string> names) => string.Join("&", names.Distinct().Select(n => $"(!{n})"));
 }
