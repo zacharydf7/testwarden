@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RollForward>Major</RollForward>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>testwarden</ToolCommandName>
+    <Description>The testwarden command: run Microsoft Testing Platform tests in CI and return an exit code you can trust.</Description>
+  </PropertyGroup>
+
+</Project>

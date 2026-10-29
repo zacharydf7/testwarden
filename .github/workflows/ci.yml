@@ -20,9 +20,7 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-      # Skipped until the first test project lands: dotnet test refuses an empty solution.
-      - if: hashFiles('tests/**/*.csproj') != ''
-        run: dotnet test -c Release
+      - run: dotnet test -c Release
 
   # A version tag such as v0.1.0 publishes that version to nuget.org, once the tests pass on both systems.
   publish:
